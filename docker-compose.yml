@@ -16,7 +16,7 @@ services:
 
   api:
     build: .
-    image: ${API_IMAGE:-product-inventory-service:latest}
+    image: ${REGISTRY:+${REGISTRY}/}product-inventory-service:${TAG:-latest}
     environment:
       ConnectionStrings__Inventory: "Host=postgres;Port=5432;Database=product_inventory;Username=inventory;Password=${POSTGRES_PASSWORD:-inventory}"
     ports:

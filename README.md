@@ -25,7 +25,8 @@ Settings come from environment variables, which override `appsettings.json`. Use
 | `POSTGRES_PASSWORD` | `inventory` | Database password, used by PostgreSQL and in the API connection string |
 | `API_PORT` | `5100` | Host port for the API |
 | `DB_PORT` | `5433` | Host port for PostgreSQL (e.g. for pgAdmin) |
-| `API_IMAGE` | `product-inventory-service:latest` | Image name for the API, e.g. a registry path |
+| `REGISTRY` | *(none)* | Registry host the image is pulled from / pushed to, e.g. `registry.example.com` |
+| `TAG` | `latest` | Image tag, e.g. a Git commit for rollback |
 
 Inside the compose network, the API reaches the database at `Host=postgres;Port=5432`.
 
@@ -50,12 +51,12 @@ docker compose up -d --no-build
 **Through a registry.** On the build machine:
 
 ```powershell
-$env:API_IMAGE = "ghcr.io/<you>/product-inventory-service:latest"
+$env:REGISTRY = "registry.example.com"
 docker compose build
 docker compose push api
 ```
 
-On the server, put `API_IMAGE=ghcr.io/<you>/product-inventory-service:latest` in `.env`, then run `docker compose pull` and `docker compose up -d --no-build`.
+On the server, put `REGISTRY=registry.example.com` in `.env`, then run `docker compose pull` and `docker compose up -d --no-build`. The image is then `registry.example.com/product-inventory-service:latest`; set `TAG` to use another tag.
 
 Images are built for the build machine's CPU architecture. For an ARM server, such as a Raspberry Pi, build on an ARM machine or use `docker buildx build --platform linux/arm64`. The database tables are created automatically when the API first starts.
 
