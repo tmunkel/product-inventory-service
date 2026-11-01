@@ -56,6 +56,20 @@ public class ProductApiTests(InventoryApiFactory factory) : IClassFixture<Invent
     }
 
     [Fact]
+    public async Task Search_by_ids_returns_only_those_products()
+    {
+        var a = await CreateAsync("Ids Product A");
+        var b = await CreateAsync("Ids Product B");
+        await CreateAsync("Ids Product C");
+
+        var result = await _client.GetFromJsonAsync<PagedResult<ProductDto>>(
+            $"/api/products?ids={a.Id}&ids={b.Id}&ids={Guid.NewGuid()}&pageSize=100");
+
+        Assert.Equal(2, result!.Total);
+        Assert.Equal(new[] { a.Id, b.Id }.Order(), result.Items.Select(p => p.Id).Order());
+    }
+
+    [Fact]
     public async Task Search_by_name_is_case_insensitive_contains_and_matches_brand()
     {
         var marker = "m" + Guid.NewGuid().ToString("N")[..8];

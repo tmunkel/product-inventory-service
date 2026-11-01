@@ -43,7 +43,7 @@ Database migrations are applied on startup (`Database:MigrateOnStartup`).
 
 | Method | Route | Description |
 |---|---|---|
-| GET | `/api/products?query=&page=1&pageSize=20` | Search (EAN exact or name/brand contains). No query lists all products. |
+| GET | `/api/products?query=&ids=&page=1&pageSize=20` | Search (EAN exact or name/brand contains). `ids` (repeatable, e.g. `?ids=a&ids=b`) limits the results to those products. Without filters, all products are listed. |
 | GET | `/api/products/{id}` | Get a product |
 | GET | `/api/products/ean/{ean}` | Get a product by EAN |
 | POST | `/api/products` | Create a product |

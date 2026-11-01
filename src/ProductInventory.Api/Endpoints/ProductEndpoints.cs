@@ -18,7 +18,7 @@ public static class ProductEndpoints
         var products = app.MapGroup("/api/products").WithTags("Products");
 
         products.MapGet("/", SearchAsync).WithName("SearchProducts")
-            .WithSummary("Search products by name/brand (contains) or EAN (exact). Without query all products are listed.");
+            .WithSummary("Search products by name/brand (contains) or EAN (exact), optionally limited to specific ids (?ids=..&ids=..). Without filters all products are listed.");
         products.MapGet("/{id:guid}", GetByIdAsync).WithName("GetProduct");
         products.MapGet("/ean/{ean}", GetByEanAsync).WithName("GetProductByEan");
         products.MapPost("/", CreateAsync).WithName("CreateProduct");
@@ -40,12 +40,17 @@ public static class ProductEndpoints
     }
 
     private static async Task<Ok<PagedResult<ProductDto>>> SearchAsync(
-        InventoryDbContext db, string? query, int page = 1, int pageSize = 20, CancellationToken ct = default)
+        InventoryDbContext db, string? query, Guid[]? ids, int page = 1, int pageSize = 20, CancellationToken ct = default)
     {
         page = Math.Max(1, page);
         pageSize = Math.Clamp(pageSize, 1, MaxPageSize);
         var q = db.Products.AsNoTracking();
         var term = query?.Trim();
+
+        if (ids is { Length: > 0 })
+        {
+            q = q.Where(p => ids.Contains(p.Id));
+        }
 
         if (Ean.LooksLikeEan(term))
         {
