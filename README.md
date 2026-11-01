@@ -24,8 +24,40 @@ Settings come from environment variables, which override `appsettings.json`. Use
 |---|---|---|
 | `POSTGRES_PASSWORD` | `inventory` | Database password, used by PostgreSQL and in the API connection string |
 | `API_PORT` | `5100` | Host port for the API |
+| `DB_PORT` | `5433` | Host port for PostgreSQL (e.g. for pgAdmin) |
+| `API_IMAGE` | `product-inventory-service:latest` | Image name for the API, e.g. a registry path |
 
 Inside the compose network, the API reaches the database at `Host=postgres;Port=5432`.
+
+### Deploy prebuilt images (no .NET SDK or source on the server)
+
+The server needs only Docker with Compose. Build the image on a machine that has the source, then copy it to the server, either as a file or through a registry.
+
+**As a file.** On the build machine:
+
+```powershell
+docker compose build
+docker save -o product-inventory-service.tar product-inventory-service:latest
+```
+
+Copy `product-inventory-service.tar` and `docker-compose.yml`, plus an optional `.env`, to a folder on the server. Then run:
+
+```bash
+docker load -i product-inventory-service.tar
+docker compose up -d --no-build
+```
+
+**Through a registry.** On the build machine:
+
+```powershell
+$env:API_IMAGE = "ghcr.io/<you>/product-inventory-service:latest"
+docker compose build
+docker compose push api
+```
+
+On the server, put `API_IMAGE=ghcr.io/<you>/product-inventory-service:latest` in `.env`, then run `docker compose pull` and `docker compose up -d --no-build`.
+
+Images are built for the build machine's CPU architecture. For an ARM server, such as a Raspberry Pi, build on an ARM machine or use `docker buildx build --platform linux/arm64`. The database tables are created automatically when the API first starts.
 
 ## Run locally
 

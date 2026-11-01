@@ -6,7 +6,7 @@ services:
       POSTGRES_USER: inventory
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-inventory}
     ports:
-      - "5433:5432"
+      - "${DB_PORT:-5433}:5432"
     volumes:
       - inventory-db:/var/lib/postgresql/data
     healthcheck:
@@ -16,7 +16,7 @@ services:
 
   api:
     build: .
-    image: product-inventory-service
+    image: ${API_IMAGE:-product-inventory-service:latest}
     environment:
       ConnectionStrings__Inventory: "Host=postgres;Port=5432;Database=product_inventory;Username=inventory;Password=${POSTGRES_PASSWORD:-inventory}"
     ports:
