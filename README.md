@@ -59,6 +59,17 @@ On the server, put `API_IMAGE=ghcr.io/<you>/product-inventory-service:latest` in
 
 Images are built for the build machine's CPU architecture. For an ARM server, such as a Raspberry Pi, build on an ARM machine or use `docker buildx build --platform linux/arm64`. The database tables are created automatically when the API first starts.
 
+### Behind Traefik (HTTPS)
+
+`docker-compose.traefik.yml` publishes the API at `https://inventory.<DOMAIN>` through a Traefik reverse proxy instead of host ports, and gives it the name `inventory-api` on the shared `proxy` network so the grocery app can reach it directly. Enable it with these lines in `.env`:
+
+```
+COMPOSE_FILE=docker-compose.yml:docker-compose.traefik.yml
+DOMAIN=example.com
+```
+
+The Traefik stack and a full walkthrough (certificates, registry, start order) live in the separate `deploy` folder; see its `README.md`.
+
 ## Run locally
 
 Prerequisites: .NET 10 SDK and Docker.

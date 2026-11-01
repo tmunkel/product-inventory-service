@@ -1,0 +1,26 @@
+# Publishes the API through Traefik (HTTPS) instead of host ports.
+# Enable on the server with COMPOSE_FILE=docker-compose.yml:docker-compose.traefik.yml in .env.
+# Requires the Traefik stack (network "proxy") to be running.
+services:
+  postgres:
+    ports: !reset []
+
+  api:
+    ports: !reset []
+    environment:
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+    networks:
+      default:
+      proxy:
+        # The grocery app calls the API directly over the proxy network with this name.
+        aliases:
+          - inventory-api
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.inventory.rule=Host(`${API_HOST:-inventory.${DOMAIN:?Set DOMAIN in .env}}`)
+      - traefik.http.routers.inventory.entrypoints=websecure
+      - traefik.http.services.inventory.loadbalancer.server.port=8080
+
+networks:
+  proxy:
+    external: true
