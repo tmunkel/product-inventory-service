@@ -4,7 +4,7 @@ services:
     environment:
       POSTGRES_DB: product_inventory
       POSTGRES_USER: inventory
-      POSTGRES_PASSWORD: inventory
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-inventory}
     ports:
       - "5433:5432"
     volumes:
@@ -14,5 +14,20 @@ services:
       interval: 5s
       retries: 10
 
+  api:
+    build: .
+    image: product-inventory-service
+    environment:
+      ConnectionStrings__Inventory: "Host=postgres;Port=5432;Database=product_inventory;Username=inventory;Password=${POSTGRES_PASSWORD:-inventory}"
+    ports:
+      - "${API_PORT:-5100}:8080"
+    volumes:
+      - inventory-images:/data/images
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
 volumes:
   inventory-db:
+  inventory-images:

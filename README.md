@@ -10,12 +10,29 @@ Features:
 - Image upload (JPEG, PNG, WebP, GIF; max 5 MB by default), stored on disk with the path in the database
 - Open Food Facts lookup to prefill new products, plus image import from Open Food Facts
 
+## Run with Docker
+
+```powershell
+docker compose up -d --build
+```
+
+This starts PostgreSQL and the API at <http://localhost:5100>. Uploaded images are stored in the `inventory-images` volume and database data in the `inventory-db` volume.
+
+Settings come from environment variables, which override `appsettings.json`. Use `__` in place of `:`, for example `ConnectionStrings__Inventory`. The compose file supports these variables, which you can also put in a `.env` file:
+
+| Variable | Default | Description |
+|---|---|---|
+| `POSTGRES_PASSWORD` | `inventory` | Database password, used by PostgreSQL and in the API connection string |
+| `API_PORT` | `5100` | Host port for the API |
+
+Inside the compose network, the API reaches the database at `Host=postgres;Port=5432`.
+
 ## Run locally
 
 Prerequisites: .NET 10 SDK and Docker.
 
 ```powershell
-docker compose up -d                      # PostgreSQL on localhost:5433
+docker compose up -d postgres             # PostgreSQL only, on localhost:5433
 dotnet run --project src/ProductInventory.Api
 ```
 
